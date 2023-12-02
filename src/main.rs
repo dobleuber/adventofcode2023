@@ -3,13 +3,58 @@ use std::fs::File;
 use std::io::prelude::*;
 
 fn main() {
-    println!("{}", day1().unwrap());
+    println!("{}", day2().unwrap());
 }
 
-fn day1() -> Result<i32, std::io::Error> {
-    let mut file = File::open("./inputs/1/input.txt")?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
+fn day2() -> Result<u32, std::io::Error> {
+    let contents = open_file("./inputs/2/input.txt")?;
+
+    // Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+    // Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+    let result: Vec<_> = contents
+        .lines()
+        .map(|line| {
+            let mut line_iter = line.split(':');
+            let _game = line_iter
+                .next()
+                .unwrap()
+                .split_ascii_whitespace()
+                .last()
+                .unwrap();
+            let balls = line_iter
+                .next()
+                .unwrap()
+                .split(';')
+                .fold([0, 0, 0], |mut acc, set| {
+                    set.split(',').for_each(|ball| {
+                        let mut ball_iter = ball.trim().split_ascii_whitespace();
+                        let number = ball_iter.next().unwrap().parse::<u32>().unwrap();
+                        let color = ball_iter.next().unwrap();
+                        match color {
+                            "red" if acc[0] < number => acc[0] = number,
+                            "green" if acc[1] < number => acc[1] = number,
+                            "blue" if acc[2] < number => acc[2] = number,
+                            _ => (),
+                        }
+                    });
+                    acc
+                });
+            balls
+        })
+        .inspect(|balls| println!("{:?}", balls))
+        .map(|balls| balls.iter().product())
+        .inspect(|product| println!("{}", product))
+        .collect();
+
+    println!("{:?}", result.iter().sum::<u32>());
+
+    let result = result.iter().sum::<u32>();
+
+    Ok(result)
+}
+
+fn _day1() -> Result<i32, std::io::Error> {
+    let contents = open_file("./inputs/1/input.txt")?;
     let result: Vec<_> = contents
         .lines()
         .map(map_line)
@@ -21,13 +66,6 @@ fn day1() -> Result<i32, std::io::Error> {
         })
         .map(|number| number.parse::<i32>().unwrap())
         .collect();
-    // for line in contents.lines() {
-    //     let mapped_line = map_line(line);
-    //     let first = mapped_line.first().unwrap();
-    //     let last = mapped_line.last().unwrap_or(first);
-
-    //     println!("{} => {}{}", line, first, last);
-    // }
 
     Ok(result.iter().sum::<i32>())
 }
@@ -59,4 +97,11 @@ fn map_line(line: &str) -> Vec<&str> {
             _ => m,
         })
         .collect::<Vec<_>>()
+}
+
+fn open_file(file_path: &str) -> Result<String, std::io::Error> {
+    let mut file = File::open(file_path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
 }
