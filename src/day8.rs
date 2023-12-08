@@ -77,30 +77,30 @@ impl Map {
     }
 
     fn resolve(&self) -> u32 {
-        let mut instructions = self.instructions.iter().cycle();
         let mut current_node = self.nodes.get("AAA").unwrap();
-        let mut steps = 0;
-        loop {
-            let instruction = instructions.next();
 
-            let next_step = match instruction {
-                Some('L') => &current_node.0,
-                Some('R') => &current_node.1,
-                _ => break,
-            };
+        let Some(steps) =
+            self.instructions
+                .iter()
+                .cycle()
+                .enumerate()
+                .find_map(|(index, instruction)| {
+                    let next_step = match instruction {
+                        'L' => current_node.0.clone(),
+                        'R' => current_node.1.clone(),
+                        _ => panic!("Invalid instruction"),
+                    };
 
-            if next_step == "ZZZ" {
-                steps += 1;
-                break;
-            }
-
-            if let Some(next_node) = self.nodes.get(next_step) {
-                current_node = next_node;
-                steps += 1;
-            } else {
-                break;
-            }
-        }
+                    if next_step == "ZZZ" {
+                        Some(index as u32 + 1)
+                    } else {
+                        current_node = self.nodes.get(&next_step).unwrap();
+                        None
+                    }
+                })
+        else {
+            panic!("No solution found");
+        };
 
         steps
     }
