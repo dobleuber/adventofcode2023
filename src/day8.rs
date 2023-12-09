@@ -1,7 +1,8 @@
 use crate::utils::open_file;
+use num::integer::lcm;
 use std::collections::HashMap;
 
-pub fn day8() -> Result<u32, std::io::Error> {
+pub fn day8() -> Result<u64, std::io::Error> {
     let contents = open_file("./inputs/8/input.txt")?;
 
     let result = resolve_puzzle(&contents);
@@ -9,7 +10,7 @@ pub fn day8() -> Result<u32, std::io::Error> {
     Ok(result)
 }
 
-fn resolve_puzzle(input: &str) -> u32 {
+fn resolve_puzzle(input: &str) -> u64 {
     let map = Map::parse(input);
     let mut ghost_map = GhostMap::new(map);
 
@@ -110,6 +111,7 @@ impl Map {
 struct GhostMap {
     map: Map,
     current_nodes: Vec<String>,
+    completed_nodes: HashMap<String, usize>,
 }
 
 impl GhostMap {
@@ -121,13 +123,19 @@ impl GhostMap {
             .map(|k| k.to_string())
             .collect();
         current_nodes.sort();
-        Self { map, current_nodes }
+        let completed_nodes = HashMap::new();
+        Self {
+            map,
+            current_nodes,
+            completed_nodes,
+        }
     }
 
     fn step(&mut self, instruction: char) {
         let current_nodes: Vec<_> = self
             .current_nodes
             .iter()
+            .filter(|node| !self.completed_nodes.contains_key(*node))
             .map(|node| {
                 let next_node = match instruction {
                     'L' => &self.map.nodes[node].0,
@@ -141,26 +149,40 @@ impl GhostMap {
         self.current_nodes = current_nodes;
     }
 
-    fn has_arrived(&self) -> bool {
-        self.current_nodes.iter().all(|node| node.ends_with('Z'))
+    fn has_arrived(&mut self, steps: usize) -> bool {
+        let completed: Vec<_> = self
+            .current_nodes
+            .iter()
+            .filter(|node| node.ends_with('Z'))
+            .filter(|node| !self.completed_nodes.contains_key(*node))
+            .collect();
+
+        for node in completed {
+            self.completed_nodes.insert(node.to_string(), steps);
+        }
+
+        if self.current_nodes.is_empty() {
+            dbg!(self.completed_nodes.clone());
+        }
+
+        self.current_nodes.is_empty() || self.completed_nodes.len() == self.current_nodes.len()
     }
 
-    fn resolve(&mut self) -> u32 {
-        let mut steps: u32 = 0;
+    fn resolve(&mut self) -> u64 {
         let instructions = self.map.instructions.clone();
-        let mut intruction = instructions.iter().cycle();
+        let mut intruction = instructions.iter().cycle().enumerate();
         loop {
-            if self.has_arrived() {
+            let (step, next_instruction) = intruction.next().unwrap();
+            if self.has_arrived(step) {
                 break;
             }
 
-            let next_instruction = intruction.next().unwrap();
-
             self.step(*next_instruction);
-            steps += 1;
         }
 
-        steps
+        self.completed_nodes
+            .values()
+            .fold(1, |acc, &steps| lcm(acc, steps as u64))
     }
 }
 
@@ -304,7 +326,7 @@ XXX = (XXX, XXX)";
             vec!["11Z".to_string(), "22Z".to_string()]
         );
 
-        assert!(ghost_map.has_arrived());
+        assert!(ghost_map.has_arrived(1));
     }
 
     #[test]
