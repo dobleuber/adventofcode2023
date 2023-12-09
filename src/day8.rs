@@ -165,7 +165,7 @@ impl GhostMap {
             dbg!(self.completed_nodes.clone());
         }
 
-        self.current_nodes.is_empty() || self.completed_nodes.len() == self.current_nodes.len()
+        self.current_nodes.is_empty()
     }
 
     fn resolve(&mut self) -> u64 {
@@ -179,6 +179,8 @@ impl GhostMap {
 
             self.step(*next_instruction);
         }
+
+        dbg!(self.completed_nodes.clone());
 
         self.completed_nodes
             .values()
@@ -326,7 +328,9 @@ XXX = (XXX, XXX)";
             vec!["11Z".to_string(), "22Z".to_string()]
         );
 
-        assert!(ghost_map.has_arrived(1));
+        assert!(!ghost_map.has_arrived(1));
+        ghost_map.step('R');
+        assert!(ghost_map.has_arrived(2));
     }
 
     #[test]
