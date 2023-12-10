@@ -9,11 +9,12 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 mod utils;
 
-use day8::day8;
+use day9::day9;
 
 fn main() {
-    let result = day8().unwrap();
+    let result = day9().unwrap();
     println!("{}", result);
 }

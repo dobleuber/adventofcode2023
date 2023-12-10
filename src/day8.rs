@@ -161,10 +161,6 @@ impl GhostMap {
             self.completed_nodes.insert(node.to_string(), steps);
         }
 
-        if self.current_nodes.is_empty() {
-            dbg!(self.completed_nodes.clone());
-        }
-
         self.current_nodes.is_empty()
     }
 
