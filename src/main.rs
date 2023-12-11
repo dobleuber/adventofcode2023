@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -12,9 +13,9 @@ mod day8;
 mod day9;
 mod utils;
 
-use day9::day9;
+use day10::day10;
 
 fn main() {
-    let result = day9().unwrap();
+    let result = day10().unwrap();
     println!("{}", result);
 }
