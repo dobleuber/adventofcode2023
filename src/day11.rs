@@ -176,6 +176,6 @@ mod tests {
 
         let distances = universe.get_all_distances();
 
-        assert_eq!(distances, 0);
+        assert_eq!(distances, 374);
     }
 }

@@ -1,6 +1,6 @@
 use crate::utils::open_file;
 use queues::{IsQueue, Queue};
-use std::{collections::BTreeMap, usize};
+use std::collections::BTreeMap;
 
 pub fn day10() -> Result<usize, std::io::Error> {
     let contents = open_file("./inputs/10/input.txt")?;
